@@ -16,6 +16,7 @@ volume/wordpress/wp-admin/*
 volume/wordpress/wp-content/*
 volume/wordpress/wp-includes/*
 volume/wordpress/*.php
+volume/wordpress/*.html
 
 
 

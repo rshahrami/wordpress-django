@@ -92,11 +92,11 @@ WSGI_APPLICATION = 'eittaweb.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'crawler',
-        'USER': 'postgres',
-        'PASSWORD': 'R12345eza',
-        'HOST': '10.32.141.8',
-        'PORT': '5432',
+        'NAME': 'dbanme',
+        'USER': 'user',
+        'PASSWORD': 'paswword',
+        'HOST': 'ip',
+        'PORT': 'port',
     }
 }
 
