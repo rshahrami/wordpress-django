@@ -35,5 +35,5 @@ click on databse and use SQL tab in phpMyAdmin for change domain in post_content
 
 ```bash
 UPDATE pp_posts SET post_content = replace(post_content, 'http://localhost', 'http://yourdomain.com'); 
-UPDATE pp_postmeta SET meta_value = replace(meta_value,'http://localhost','http://yourdomain.com');
+UPDATE pp_postmeta SET meta_value = replace(meta_value, 'http://localhost','http://yourdomain.com');
 ```
