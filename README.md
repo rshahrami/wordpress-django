@@ -37,3 +37,8 @@ click on databse and use SQL tab in phpMyAdmin for change domain in post_content
 UPDATE pp_posts SET post_content = replace(post_content, 'http://localhost', 'http://yourdomain.com'); 
 UPDATE pp_postmeta SET meta_value = replace(meta_value, 'http://localhost','http://yourdomain.com');
 ```
+
+
+use below website address for transfer wordpress from host to local
+
+[wordpress](https://mizbanfa.net/blog/cms/wordpress/transfer-wordpress-from-host-to-localhost/)
