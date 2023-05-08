@@ -1,0 +1,341 @@
+services:
+
+  mysql:
+    hostname: mysql
+    image: mysql:8.0.30
+    command: '--default-authentication-plugin=mysql_native_password'
+    # env_file: 
+    #   - wordpress.env
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=MYSQL_DATABASE
+      - MYSQL_USER=MYSQL_USER
+      - MYSQL_PASSWORD=MYSQL_PASSWORD
+
+    # networks:
+    #   - iranmafront
+    # networks:
+    #   - wordpress
+    expose:
+      - 3306
+      - 33060
+    volumes:
+      - /volume/mysql/data/:/var/lib/mysql/
+      - /volume/mysql/backup/:/backup/
+
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == master1
+
+
+  phpmyadmin:
+    hostname: phpmyadmin
+    image: phpmyadmin:5.2.1
+    restart: always
+    # networks:
+    #   - wordpress
+    ports:
+      - 9090:80
+    environment:
+      - PMA_ARBITRARY=1
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == master1
+
+
+
+  haproxy:
+    hostname: haproxy
+    # env_file: .iranma.env
+    image: haproxy:2.7.1-v1
+    # image: haproxy:${HAPROXY_TAG}
+    # build: './haproxy'
+    restart: always
+    ports:
+      - "8084:8084"
+      - "80:80"
+    volumes:
+      - /volume/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    # networks:
+    #   - iranmafront
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+
+######################################################  01  ##############################################
+
+  wordpress01:
+    hostname: wordpress01
+    image: wordpress:6.1.1-fpm
+    restart: always
+    # env_file:
+    #   - wordpress.env
+    environment:
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_USER=WORDPRESS_DB_USER
+      - WORDPRESS_DB_PASSWORD=WORDPRESS_DB_PASSWORD
+      - WORDPRESS_DB_NAME=WORDPRESS_DB_NAME
+      - WORDPRESS_TABLE_PREFIX=pp
+      - DOCKER_COMPOSE_YML_LOCATION=${PWD}
+
+    # networks:
+    #   - iranmafront
+    # networks:
+    #   - wordpress
+    # ports:
+    #   - 9000:9000
+    volumes:
+      - /volume/wordpress/:/var/www/html/
+      - /volume/php/php.ini:/usr/local/etc/php/conf.d/php.ini
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+
+
+
+  website01:
+    hostname: website01
+    # build: './'
+    # image: website:v1.0.0
+    image: website:v1.0.0
+    # ports:
+    #   - 8585:8585
+    # expose:
+    #   - 8585
+    # networks:
+    #  - wordpress
+    volumes:
+      - /volume/app/media/post/:/app/media/post/
+      - /volume/app/media/mokeb/:/app/media/mokeb/
+      - /volume/app/media/uploadimage/:/app/media/uploadimage/
+      - /volume/app/db/db.sqlite3:/app/db.sqlite3
+      - /volume/app/static/admin/:/app/static/admin/
+      - /volume/app/static/css/:/app/static/css/
+      - /volume/app/static/js/:/app/static/js/
+      - /volume/app/static/vendor/:/app/static/vendor/
+      - /volume/app/static/templates/:/app/static/templates/
+      - /volume/app/static/fontawesomefree/:/app/static/fontawesomefree/
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+
+
+
+  nginx01:
+    hostname: nginx01
+    #container_name: nginx
+    image: nginx:1.23.0
+    restart: unless-stopped
+    # expose:
+    #   - 80
+    # networks:
+    #   - wordpress
+    # ports:
+    #   - 80:80
+    #   - 443:443
+    volumes:
+      - /volume/wordpress/:/var/www/html/
+      - /volume/nginx1/default.conf:/etc/nginx/conf.d/default.conf
+      - /volume/app/media/post/:/apprasad/media/post/
+      - /volume/app/media/mokeb/:/apprasad/media/mokeb/
+      - /volume/app/media/uploadimage/:/apprasad/media/uploadimage/
+      - /volume/app/static/admin/:/apprasad/static/admin/
+      - /volume/app/static/css/:/apprasad/static/css/
+      - /volume/app/static/js/:/apprasad/static/js/
+      - /volume/app/static/vendor/:/apprasad/static/vendor/
+      - /volume/app/static/templates/:/apprasad/static/templates/
+      - /volume/app/static/fontawesomefree/:/apprasad/static/fontawesomefree/
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+
+
+
+#########################################################  02  ###########################################
+
+  wordpress02:
+    hostname: wordpress02
+    image: wordpress:6.1.1-fpm
+    restart: always
+    # env_file:
+    #   - wordpress.env
+    environment:
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_USER=WORDPRESS_DB_USER
+      - WORDPRESS_DB_PASSWORD=WORDPRESS_DB_PASSWORD
+      - WORDPRESS_DB_NAME=WORDPRESS_DB_NAME
+      - WORDPRESS_TABLE_PREFIX=pp
+      - DOCKER_COMPOSE_YML_LOCATION=${PWD}
+
+    # networks:
+    #   - iranmafront
+    # networks:
+    #   - wordpress
+    # ports:
+    #   - 80:80
+    volumes:
+      - /volume/wordpress/:/var/www/html/
+      - /volume/php/php.ini:/usr/local/etc/php/conf.d/php.ini
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == master2
+
+
+
+  website02:
+    hostname: website02
+    # build: './'
+    # image: website:v1.0.0
+    image: website:v1.0.0
+    # ports:
+    #   - 8585:8585
+    # expose:
+    #   - 8585
+    # networks:
+    #  - wordpress
+    volumes:
+      - /volume/app/media/post/:/app/media/post/
+      - /volume/app/media/mokeb/:/app/media/mokeb/
+      - /volume/app/media/uploadimage/:/app/media/uploadimage/
+      - /volume/app/db/db.sqlite3:/app/db.sqlite3
+      - /volume/app/static/admin/:/app/static/admin/
+      - /volume/app/static/css/:/app/static/css/
+      - /volume/app/static/js/:/app/static/js/
+      - /volume/app/static/vendor/:/app/static/vendor/
+      - /volume/app/static/templates/:/app/static/templates/
+      - /volume/app/static/fontawesomefree/:/app/static/fontawesomefree/
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == master2
+
+
+
+  nginx02:
+    hostname: nginx02
+    #container_name: nginx
+    image: nginx:1.23.0
+    restart: unless-stopped
+    # expose:
+    #   - 80
+    # networks:
+    #   - wordpress
+    # ports:
+    #   - 80:80
+      # - 443:443
+    volumes:
+      - /volume/wordpress/:/var/www/html/
+      - /volume/nginx2/default.conf:/etc/nginx/conf.d/default.conf
+      - /volume/app/media/post/:/apprasad/media/post/
+      - /volume/app/media/mokeb/:/apprasad/media/mokeb/
+      - /volume/app/media/uploadimage/:/apprasad/media/uploadimage/
+      - /volume/app/static/admin/:/apprasad/static/admin/
+      - /volume/app/static/css/:/apprasad/static/css/
+      - /volume/app/static/js/:/apprasad/static/js/
+      - /volume/app/static/vendor/:/apprasad/static/vendor/
+      - /volume/app/static/templates/:/apprasad/static/templates/
+      - /volume/app/static/fontawesomefree/:/apprasad/static/fontawesomefree/
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == master2
+
+
+
+#########################################################  03  ###########################################
+
+  wordpress03:
+    hostname: wordpress03
+    image: wordpress:6.1.1-fpm
+    restart: always
+    # env_file:
+    #   - wordpress.env
+    environment:
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_USER=WORDPRESS_DB_USER
+      - WORDPRESS_DB_PASSWORD=WORDPRESS_DB_PASSWORD
+      - WORDPRESS_DB_NAME=WORDPRESS_DB_NAME
+      - WORDPRESS_TABLE_PREFIX=pp
+      - DOCKER_COMPOSE_YML_LOCATION=${PWD}
+
+    # networks:
+    #   - iranmafront
+    # networks:
+    #   - wordpress
+    # ports:
+    #   - 80:80
+    volumes:
+      - /volume/wordpress/:/var/www/html/
+      - /volume/php/php.ini:/usr/local/etc/php/conf.d/php.ini
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == master3
+
+
+
+  website03:
+    hostname: website03
+    # build: './'
+    # image: website:v1.0.0
+    image: website:v1.0.0
+    # ports:
+    #   - 8585:8585
+    # expose:
+    #   - 8585
+    # networks:
+    #  - wordpress
+    volumes:
+      - /volume/app/media/post/:/app/media/post/
+      - /volume/app/media/mokeb/:/app/media/mokeb/
+      - /volume/app/media/uploadimage/:/app/media/uploadimage/
+      - /volume/app/db/db.sqlite3:/app/db.sqlite3
+      - /volume/app/static/admin/:/app/static/admin/
+      - /volume/app/static/css/:/app/static/css/
+      - /volume/app/static/js/:/app/static/js/
+      - /volume/app/static/vendor/:/app/static/vendor/
+      - /volume/app/static/templates/:/app/static/templates/
+      - /volume/app/static/fontawesomefree/:/app/static/fontawesomefree/
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == master3
+
+
+
+  nginx03:
+    hostname: nginx03
+    #container_name: nginx
+    image: nginx:1.23.0
+    restart: unless-stopped
+    # expose:
+    #   - 80
+    # networks:
+    #   - wordpress
+    # ports:
+    #   - 80:80
+      # - 443:443
+    volumes:
+      - /volume/wordpress/:/var/www/html/
+      - /volume/nginx3/default.conf:/etc/nginx/conf.d/default.conf
+      - /volume/app/media/post/:/apprasad/media/post/
+      - /volume/app/media/mokeb/:/apprasad/media/mokeb/
+      - /volume/app/media/uploadimage/:/apprasad/media/uploadimage/
+      - /volume/app/static/admin/:/apprasad/static/admin/
+      - /volume/app/static/css/:/apprasad/static/css/
+      - /volume/app/static/js/:/apprasad/static/js/
+      - /volume/app/static/vendor/:/apprasad/static/vendor/
+      - /volume/app/static/templates/:/apprasad/static/templates/
+      - /volume/app/static/fontawesomefree/:/apprasad/static/fontawesomefree/
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == master3

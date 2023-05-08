@@ -1,0 +1,150 @@
+services:
+  haproxy:
+    hostname: haproxy
+    # env_file: .iranma.env
+    image: haproxy:2.7.1-v1
+    # image: haproxy:${HAPROXY_TAG}
+    # build: './haproxy'
+    restart: always
+    ports:
+      - "8084:8084"
+      - "80:80"
+    volumes:
+      - /volume/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    # networks:
+    #   - iranmafront
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+
+  mysql:
+    hostname: mysql
+    image: mysql:8.0.30
+    command: '--default-authentication-plugin=mysql_native_password'
+    # env_file: 
+    #   - wordpress.env
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=6DatB3^SQ8Gq
+      - MYSQL_DATABASE=didard_didar
+      - MYSQL_USER=didard_didar
+      - MYSQL_PASSWORD=B#x5K*%A%Q19
+
+    # networks:
+    #   - iranmafront
+    # networks:
+    #   - wordpress
+    expose:
+      - 3306
+      - 33060
+    volumes:
+      - /volume/mysql/data/:/var/lib/mysql/
+      - /volume/mysql/backup/:/backup/
+
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == master1
+
+  wordpress:
+    hostname: wordpress
+    image: wordpress:6.1.1-fpm
+    restart: always
+    # env_file:
+    #   - wordpress.env
+    environment:
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_USER=didard_didar
+      - WORDPRESS_DB_PASSWORD=B#x5K*%A%Q19
+      - WORDPRESS_DB_NAME=didard_didar
+      - WORDPRESS_TABLE_PREFIX=pp
+      - DOCKER_COMPOSE_YML_LOCATION=${PWD}
+
+    # networks:
+    #   - iranmafront
+    # networks:
+    #   - wordpress
+    # ports:
+    #   - 80:80
+    volumes:
+      - /volume/wordpress/:/var/www/html/
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+
+
+  phpmyadmin:
+    hostname: phpmyadmin
+    image: phpmyadmin:5.2.1
+    restart: always
+    # networks:
+    #   - wordpress
+    ports:
+      - 9090:80
+    environment:
+      - PMA_ARBITRARY=1
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+
+#compose file for create stack in use swarm
+
+  website:
+    hostname: website
+    # build: './'
+    # image: website:v1.0.0
+    image: website:test
+    # ports:
+    #   - 8585:8585
+    # expose:
+    #   - 8585
+    # networks:
+    #  - wordpress
+    volumes:
+      - /volume/app3/media/post/:/app/media/post/
+      - /volume/app3/media/mokeb/:/app/media/mokeb/
+      - /volume/app3/media/uploadimage/:/app/media/uploadimage/
+      - /volume/app3/db/db.sqlite3:/app/db.sqlite3
+      - /volume/app3/static/admin/:/app/static/admin/
+      - /volume/app3/static/css/:/app/static/css/
+      - /volume/app3/static/js/:/app/static/js/
+      - /volume/app3/static/vendor/:/app/static/vendor/
+      - /volume/app3/static/templates/:/app/static/templates/
+      - /volume/app3/static/fontawesomefree/:/app/static/fontawesomefree/
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+
+  nginx01:
+    hostname: nginx01
+    #container_name: nginx
+    image: nginx:1.23.0
+    restart: unless-stopped
+    # expose:
+    #   - 80
+    # networks:
+    #   - wordpress
+    # ports:
+    #   - 80:80
+      # - 443:443
+    volumes:
+      - /volume/wordpress/:/var/www/html/
+      - /volume/nginx1/default.conf:/etc/nginx/conf.d/default.conf
+      - /volume/app3/media/post/:/apprasad/media/post/
+      - /volume/app3/media/mokeb/:/apprasad/media/mokeb/
+      - /volume/app3/media/uploadimage/:/apprasad/media/uploadimage/
+      - /volume/app3/static/admin/:/apprasad/static/admin/
+      - /volume/app3/static/css/:/apprasad/static/css/
+      - /volume/app3/static/js/:/apprasad/static/js/
+      - /volume/app3/static/vendor/:/apprasad/static/vendor/
+      - /volume/app3/static/templates/:/apprasad/static/templates/
+      - /volume/app3/static/fontawesomefree/:/apprasad/static/fontawesomefree/
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+
